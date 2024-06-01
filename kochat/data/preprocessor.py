@@ -129,8 +129,9 @@ class Preprocessor:
 
         # ajax 크롤링을 이용합니다 (네이버 맞춤법 검사기)
         data = sess.get(
-            url='https://m.search.naver.com/p/csearch/ocontent/spellchecker.nhn',
+            url='https://m.search.naver.com/p/csearch/ocontent/util/SpellerProxy',
             params={
+                'passportKey': 'f3dff7c22f2c6895593e9cd2474ed43cefcf1520',
                 '_callback':
                     'window.__jindo2_callback._spellingCheck_0',
                 'q': text},
