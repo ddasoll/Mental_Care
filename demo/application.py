@@ -1,11 +1,13 @@
 import sys
-sys.path.append('C:\\pythonProject\\temp\\kochat')
+
+sys.path.append('C:\\pythonProject\\Mental_Care')
 """
 @auther Hyunwoong
 @since 7/1/2020
 @see https://github.com/gusdnd852
 """
 from flask import render_template
+import logging
 
 from kochat.app import KochatApi
 from kochat.data import Dataset
@@ -16,7 +18,6 @@ from kochat.proc import DistanceClassifier, GensimEmbedder, EntityRecognizer, So
 from demo.scenario import dust, weather, travel, restaurant
 # from scenario import dust, weather, travel, restaurant
 # 에러 나면 이걸로 실행해보세요!
-
 
 dataset = Dataset(ood=True)
 emb = GensimEmbedder(model=embed.FastText())
