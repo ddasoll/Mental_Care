@@ -4,13 +4,14 @@
 @see : https://github.com/gusdnd852
 """
 import json
+import logging
 import re
 
 import torch
 from torch import Tensor
 from konlpy.tag import Okt
 from requests import Session
-
+from urllib import parse
 from kochat.decorators import data
 
 
@@ -27,6 +28,7 @@ class Preprocessor:
 
         self.okt = Okt()
         self.naver_fix = naver_fix
+        self.passport_key = self.get_passport_key()
 
     def pad_sequencing(self, sequence: Tensor) -> tuple:
         """
@@ -126,12 +128,13 @@ class Preprocessor:
             raise Exception('500글자 이상 넘을 수 없음!')
 
         sess = Session()
-
+        key = self.passport_key
+        logging.info(f'[key 확인 : ] {key}')
         # ajax 크롤링을 이용합니다 (네이버 맞춤법 검사기)
         data = sess.get(
             url='https://m.search.naver.com/p/csearch/ocontent/util/SpellerProxy',
             params={
-                'passportKey': 'f3dff7c22f2c6895593e9cd2474ed43cefcf1520',
+                'passportKey': key,
                 '_callback':
                     'window.__jindo2_callback._spellingCheck_0',
                 'q': text},
@@ -145,3 +148,17 @@ class Preprocessor:
         html = data['message']['result']['html']  # 원하는부분 가져오기
         out = re.sub(re.compile('<.*?>'), '', html)  # tag 잘라내기
         return out
+
+    # 네이버 맞춤법 검사기 passportKey가 매일 변하므로 크롤링하여 passportKey를 추출하여 가져옴
+    def get_passport_key(self) -> str:
+        key = ''
+        sess = Session()
+        spell_checker_url = sess.get(
+            url='https://search.naver.com/search.naver?where=nexearch&sm=top_hty&fbm=1&ie=utf8&query=맞춤법검사기'
+        )
+
+        logging.debug(f'[key] {spell_checker_url.text}')
+        match = re.search('passportKey=([a-zA-Z0-9]+)', spell_checker_url.text)
+        if match is not None:
+            key = parse.unquote(match.group(1))
+        return key
